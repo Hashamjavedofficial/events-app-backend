@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 const {Schema} = mongoose
 
 const userSchema = new Schema({
@@ -22,6 +23,19 @@ const userSchema = new Schema({
         }
     }
 })
+
+userSchema.methods.generateToken = async function (){
+    let token;
+    try {
+        token = await jwt.sign(
+            { _id:this._id },
+            'generatesecretecodeforthe@event@/app'
+        );
+        return token
+    } catch (error) {
+       throw new Error('Something went wrong, try again later')
+    }
+}
 
 userSchema.statics.findByCresidentials = async (email,password)=>{
     const user = await User.findOne({email})

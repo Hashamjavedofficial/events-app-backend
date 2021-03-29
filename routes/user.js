@@ -15,7 +15,11 @@ router.post('/create',async (req,res,next)=>{
                 code:req.body.code
             })
             const saveUser = await user.save()
-            res.status(201).json({message:'User created successfully',data:saveUser})
+            const token = await saveUser.generateToken()
+            res.status(201).json({message:'User created successfully',data:{
+                ...saveUser._doc,
+                    token
+                }})
         }
     }catch(e){
         res.status(400).send({message:e.message})
@@ -25,7 +29,11 @@ router.post('/create',async (req,res,next)=>{
 router.post('/login',async (req,res)=>{
     try{
         const user =await User.findByCresidentials(req.body.email,req.body.password);
-        res.status(200).json({message:'Success',data:user})
+        const token = await user.generateToken()
+        res.status(200).json({message:'Success',data:{
+            ...user._doc,
+                token
+            }})
     }catch(e){
         res.status(500).json({message:e.message})
     }
