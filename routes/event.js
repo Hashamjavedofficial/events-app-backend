@@ -1,16 +1,36 @@
 const express = require('express')
+const multer = require('multer')
+const sharp = require('sharp')
 const router = express.Router()
 const Event =require('../models/event')
 
 const auth = require('../middlewares/authentication')
 
-router.post('/create',auth,async (req,res,next)=>{
+const upload = multer({
+    limits: {
+        fileSize: 1000000,
+    },
+    fileFilter(req, file, cb) {
+        if (!file.originalname.toLowerCase().match(/\.(jpe?g|png|gif|jpeg)$/i)) {
+            return cb(new Error("Not a valid file"));
+        }
+        cb(undefined, true);
+    },
+});
+
+router.post('/create',auth,upload.single('eventImage'),async (req,res,next)=>{
     try{
+        const buffer = await sharp(req.file.buffer)
+        .png()
+        .resize({ width: 250, height: 250 })
+        .toBuffer();
         const event = new Event({
             sport:req.body.sport,
             eventDate:req.body.eventDate,
-            status:req.body.status,
-            description:req.body.description
+            address:req.body.address,
+            description:req.body.description,
+            title:req.body.title,
+            eventImage:buffer
         });
         const savedEvent = await event.save();
         res.status(201).json({message:'Event created successfully',data:savedEvent})

@@ -13,7 +13,10 @@ const athleteSchema = new Schema({
     },
     country:{
         type:String
-    }
+    },
+    athleteImage: {
+        type: Buffer,
+    },
 })
 
 const Athlete = mongoose.model('Athlete',athleteSchema)

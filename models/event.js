@@ -16,7 +16,10 @@ const eventSchema = new Schema({
     },
     description:{
         type:String
-    }
+    },
+    eventImage: {
+        type: Buffer,
+    },
 })
 
 const Event = mongoose.model('Event',eventSchema)
