@@ -2,7 +2,9 @@ const express = require('express')
 const router = express.Router()
 const Event =require('../models/event')
 
-router.post('/create',async (req,res,next)=>{
+const auth = require('../middlewares/authentication')
+
+router.post('/create',auth,async (req,res,next)=>{
     try{
         const event = new Event({
             sport:req.body.sport,
