@@ -8,7 +8,7 @@ const auth = require('../middlewares/authentication')
 
 const upload = multer({
     limits: {
-        fileSize: 1000000,
+        fileSize: 1000000000,
     },
     fileFilter(req, file, cb) {
         if (!file.originalname.toLowerCase().match(/\.(jpe?g|png|gif|jpeg)$/i)) {
@@ -20,10 +20,13 @@ const upload = multer({
 
 router.post('/create',auth,upload.single('eventImage'),async (req,res,next)=>{
     try{
-        const buffer = await sharp(req.file.buffer)
-        .png()
-        .resize({ width: 250, height: 250 })
-        .toBuffer();
+        let buffer=null;
+        if(req.file){
+            buffer = await sharp(req.file.buffer)
+                .png()
+                .resize({ width: 250, height: 250 })
+                .toBuffer();
+        }
         const event = new Event({
             sport:req.body.sport,
             eventDate:req.body.eventDate,
@@ -39,7 +42,7 @@ router.post('/create',auth,upload.single('eventImage'),async (req,res,next)=>{
     }
 })
 
-router.get('/',async (req,res)=>{
+router.get('/',auth,async (req,res)=>{
     try{
         const events = await Event.find({})
         if(!events){
