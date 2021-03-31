@@ -4,6 +4,8 @@ const sharp = require('sharp')
 const router = express.Router()
 const Event =require('../models/event')
 
+const {bufferToImage} = require('../helpers/helperFunctions')
+
 const auth = require('../middlewares/authentication')
 
 const upload = multer({
@@ -42,6 +44,30 @@ router.post('/create',auth,upload.single('eventImage'),async (req,res,next)=>{
     }
 })
 
+router.put('/update',auth,upload.single('eventImage'),async (req,res,next)=>{
+    try{
+        let buffer=null;
+        if(req.file){
+            buffer = await sharp(req.file.buffer)
+                .png()
+                .resize({ width: 250, height: 250 })
+                .toBuffer();
+        }
+        const savedEvent = await Event.findOneAndUpdate({_id:req.body.id},{
+            sport:req.body.sport,
+            eventDate:req.body.eventDate,
+            address:req.body.address,
+            description:req.body.description,
+            title:req.body.title,
+            eventImage:buffer
+        })
+
+        res.status(201).json({message:'Event created successfully',data:savedEvent})
+    }catch(e){
+        res.status(500).send({message:e.message})
+    }
+})
+
 router.get('/',auth,async (req,res)=>{
     try{
         const events = await Event.find({})
@@ -54,7 +80,7 @@ router.get('/',auth,async (req,res)=>{
     }
 })
 
-router.get('/:id',async (req,res)=>{
+router.get('/:id',auth,async (req,res)=>{
     try{
         const {id} = req.params;
         const event = await Event.findById(id);
