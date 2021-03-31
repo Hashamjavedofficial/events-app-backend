@@ -3,6 +3,8 @@ const mongoose = require('mongoose')
 const morgan = require('morgan')
 const cors = require('cors')
 
+const {databaseConnectionString} = require('./helpers/constants')
+
 const userRouter = require('./routes/user');
 const eventRouter = require('./routes/event')
 
@@ -18,7 +20,7 @@ app.use('/events',eventRouter)
 const PORT =  process.env.PORT || 5000;
 
 
-mongoose.connect('mongodb://localhost:27017/events-database',{useNewUrlParser: true, useUnifiedTopology: true}).then(res=>{
+mongoose.connect(databaseConnectionString,{useNewUrlParser: true, useUnifiedTopology: true}).then(res=>{
     app.listen(PORT,()=>{
         console.log('Server is up on PORT ',PORT);
     })

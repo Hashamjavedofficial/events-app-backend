@@ -1,6 +1,7 @@
 const express = require('express')
 const multer = require('multer')
 const sharp = require('sharp')
+const moment = require('moment')
 const router = express.Router()
 const Event =require('../models/event')
 
@@ -53,7 +54,7 @@ router.put('/update',auth,upload.single('eventImage'),async (req,res,next)=>{
                 .resize({ width: 250, height: 250 })
                 .toBuffer();
         }
-        const savedEvent = await Event.findOneAndUpdate({_id:req.body.id},{
+        const savedEvent = await Event.findOneAndUpdate({_id:req.body._id},{
             sport:req.body.sport,
             eventDate:req.body.eventDate,
             address:req.body.address,
@@ -62,7 +63,7 @@ router.put('/update',auth,upload.single('eventImage'),async (req,res,next)=>{
             eventImage:buffer
         })
 
-        res.status(201).json({message:'Event created successfully',data:savedEvent})
+        res.status(201).json({message:'Event updated successfully',data:savedEvent})
     }catch(e){
         res.status(500).send({message:e.message})
     }
@@ -90,6 +91,34 @@ router.get('/:id',auth,async (req,res)=>{
         res.status(200).json({message:'Success',data:event})
     }catch(e){
         res.status(500).json({message:e.message})
+    }
+})
+
+router.post('/search',auth,async(req,res)=>{
+    try{
+        const today = moment(req.body.date).startOf('day')
+        const events = await Event.find({$or:[{eventDate: {
+                    $gte: today.toDate(),
+                    $lte: moment(today).endOf('day').toDate()
+                }},{sport:req.body.sport}]})
+        res.status(200).json({message:'Found Users',data:events})
+    }catch (e) {
+        res.status(500).json({message:e.message})
+    }
+})
+
+
+
+
+
+
+
+router.delete('/:id',auth,async(req,res)=>{
+    try{
+        const event = await Event.deleteOne({_id:req.params.id});
+        res.status(200).json({message:'User Deleted',data:event})
+    }catch (e) {
+        res.status(200).json({message:e.message})
     }
 })
 
