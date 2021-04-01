@@ -7,6 +7,7 @@ const {databaseConnectionString} = require('./helpers/constants')
 
 const userRouter = require('./routes/user');
 const eventRouter = require('./routes/event')
+const athleteRouter = require('./routes/athlete')
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(morgan('dev'))
 
 app.use('/users',userRouter);
 app.use('/events',eventRouter)
+app.use('/athlete',athleteRouter)
 
 const PORT =  process.env.PORT || 5000;
 

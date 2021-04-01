@@ -3,7 +3,7 @@ const multer = require('multer')
 const sharp = require('sharp')
 const moment = require('moment')
 const router = express.Router()
-const Event =require('../models/event')
+const Athlete =require('../models/athlete')
 
 const {bufferToImage} = require('../helpers/helperFunctions')
 
@@ -21,7 +21,7 @@ const upload = multer({
     },
 });
 
-router.post('/create',upload.single('eventImage'),async (req,res,next)=>{
+router.post('/create',auth,upload.single('athleteImage'),async (req,res,next)=>{
     try{
         let buffer=null;
         if(req.file){
@@ -30,22 +30,21 @@ router.post('/create',upload.single('eventImage'),async (req,res,next)=>{
                 .resize({ width: 250, height: 250 })
                 .toBuffer();
         }
-        const event = new Event({
+        const athlete = new Athlete({
+            name:req.body.name,
+            underInvestigation:req.body.underInvestigation,
             sport:req.body.sport,
-            eventDate:req.body.eventDate,
-            address:req.body.address,
-            description:req.body.description,
-            title:req.body.title,
-            eventImage:buffer
+            country:req.body.country,
+            athleteImage:buffer
         });
-        const savedEvent = await event.save();
-        res.status(201).json({message:'Event created successfully',data:savedEvent})
+        const savedAthlete= await athlete.save();
+        res.status(201).json({message:'Athlete created successfully',data:savedAthlete})
     }catch(e){
         res.status(500).send({message:e.message})
     }
 })
 
-router.put('/update',upload.single('eventImage'),async (req,res,next)=>{
+router.put('/update',auth,upload.single('athleteImage'),async (req,res,next)=>{
     try{
         let buffer=null;
         if(req.file){
@@ -54,16 +53,15 @@ router.put('/update',upload.single('eventImage'),async (req,res,next)=>{
                 .resize({ width: 250, height: 250 })
                 .toBuffer();
         }
-        const savedEvent = await Event.findOneAndUpdate({_id:req.body._id},{
+        const savedAthlete = await Athlete.findOneAndUpdate({_id:req.body._id},{
+            name:req.body.name,
+            underInvestigation:req.body.underInvestigation,
             sport:req.body.sport,
-            eventDate:req.body.eventDate,
-            address:req.body.address,
-            description:req.body.description,
-            title:req.body.title,
-            eventImage:buffer
+            country:req.body.country,
+            athleteImage:buffer
         })
 
-        res.status(201).json({message:'Event updated successfully',data:savedEvent})
+        res.status(201).json({message:'Athlete updated successfully',data:savedAthlete})
     }catch(e){
         res.status(500).send({message:e.message})
     }
@@ -71,11 +69,11 @@ router.put('/update',upload.single('eventImage'),async (req,res,next)=>{
 
 router.get('/',auth,async (req,res)=>{
     try{
-        const events = await Event.find({})
-        if(!events){
-            throw new Error('No events found')
+        const athletes = await Athlete.find({})
+        if(!athletes){
+            throw new Error('No athletes found')
         }
-        res.status(200).json({message:"Success",data:events})
+        res.status(200).json({message:"Success",data:athletes})
     }catch(e){
         res.status(500).send({message:e.message})
     }
@@ -84,11 +82,11 @@ router.get('/',auth,async (req,res)=>{
 router.get('/:id',auth,async (req,res)=>{
     try{
         const {id} = req.params;
-        const event = await Event.findById(id);
-        if(!event){
-            res.status(404).json({message:'Event Not found'})
+        const athlete = await Athlete.findById(id);
+        if(!athlete){
+            res.status(404).json({message:'Athlete Not found'})
         }
-        res.status(200).json({message:'Success',data:event})
+        res.status(200).json({message:'Success',data:athlete})
     }catch(e){
         res.status(500).json({message:e.message})
     }
@@ -96,27 +94,17 @@ router.get('/:id',auth,async (req,res)=>{
 
 router.post('/search',auth,async(req,res)=>{
     try{
-        const today = moment(req.body.date).startOf('day')
-        const events = await Event.find({$or:[{eventDate: {
-                    $gte: today.toDate(),
-                    $lte: moment(today).endOf('day').toDate()
-                }},{sport:req.body.sport}]})
-        res.status(200).json({message:'Found Users',data:events})
+        const athletes = await Athlete.find({$or:[{country:req.body.country},{sport:req.body.sport}]})
+        res.status(200).json({message:'Found Athletes',data:athletes})
     }catch (e) {
         res.status(500).json({message:e.message})
     }
 })
 
-
-
-
-
-
-
 router.delete('/:id',auth,async(req,res)=>{
     try{
-        const event = await Event.deleteOne({_id:req.params.id});
-        res.status(200).json({message:'User Deleted',data:event})
+        const athlete = await Athlete.deleteOne({_id:req.params.id});
+        res.status(200).json({message:'Athlete Deleted',data:athlete})
     }catch (e) {
         res.status(200).json({message:e.message})
     }
