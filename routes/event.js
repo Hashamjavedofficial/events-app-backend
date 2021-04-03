@@ -78,7 +78,7 @@ router.post('/search',auth,async(req,res)=>{
         const events = await Event.find({$or:[{eventDate: {
                     $gte: today.toDate(),
                     $lte: moment(today).endOf('day').toDate()
-                }},{sport:req.body.sport}]})
+                }},{sport:req.body.sport}]}).populate('athletes')
         res.status(200).json({message:'Found Users',data:events})
     }catch (e) {
         res.status(500).json({message:e.message})
@@ -98,7 +98,7 @@ router.patch('/addathlete',async(req,res)=>{
                     _id:athleteId
                 }
             }
-        },{new:true,useFindAndModify:false})
+        },{new:true,useFindAndModify:false}).populate('athletes')
 res.status(200).json({message:'Athlete added',data:updatedEvent})
     }catch(e){
         res.status(500).json({message:e.message})
@@ -107,7 +107,10 @@ res.status(200).json({message:'Athlete added',data:updatedEvent})
 
 router.patch('/add-result',async(req,res)=>{
     try{
-        const updatedEvent = await Event.findOne({_id:req.body._id},{result:req.body.result},{new:true})
+        const updatedEvent = await Event.findOneAndUpdate({_id:req.body._id},{result:req.body.result},{new:true})
+        if(!updatedEvent){
+            throw new Error("No")
+        }
         res.status(200).json({message:"Result added",data:updatedEvent})
     }catch(e){
         res.status(500).json({message:e.message})
