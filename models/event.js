@@ -24,7 +24,10 @@ const eventSchema = new Schema({
         {type:Schema.Types.ObjectId,
         ref:'Athlete'
     }
-    ]
+    ],
+    result:{
+        type:String,
+    }
 })
 
 const Event = mongoose.model('Event',eventSchema)

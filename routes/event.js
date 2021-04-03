@@ -2,12 +2,14 @@ const express = require('express')
 const multer = require('multer')
 const sharp = require('sharp')
 const moment = require('moment')
+const mongoose = require('mongoose')
 const router = express.Router()
 const Event =require('../models/event')
 
 const {bufferToImage} = require('../helpers/helperFunctions')
 
 const auth = require('../middlewares/authentication')
+const { findOneAndUpdate } = require('../models/event')
 
 const upload = multer({
     limits: {
@@ -83,9 +85,13 @@ router.post('/search',auth,async(req,res)=>{
     }
 })
 
-router.post('/addathlete',async(req,res)=>{
+router.patch('/addathlete',async(req,res)=>{
     try{
         const {eventId,athleteId} = req.body
+        const checkAthlete = await Event.findOne({athletes:{$in:[mongoose.Types.ObjectId(athleteId)]}})
+        if(checkAthlete){
+            throw new Error("Athlete already in the event")
+        }
         const updatedEvent =await Event.findOneAndUpdate({_id:eventId},{
             $push:{
                 athletes:{
@@ -98,6 +104,16 @@ res.status(200).json({message:'Athlete added',data:updatedEvent})
         res.status(500).json({message:e.message})
     }
 })
+
+router.patch('/add-result',async(req,res)=>{
+    try{
+        const updatedEvent = await Event.findOne({_id:req.body._id},{result:req.body.result},{new:true})
+        res.status(200).json({message:"Result added",data:updatedEvent})
+    }catch(e){
+        res.status(500).json({message:e.message})
+    }
+})
+
 
 router.get('/',auth,async (req,res)=>{
     try{
