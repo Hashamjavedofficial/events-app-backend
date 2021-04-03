@@ -69,9 +69,39 @@ router.put('/update',upload.single('eventImage'),async (req,res,next)=>{
     }
 })
 
+
+router.post('/search',auth,async(req,res)=>{
+    try{
+        const today = moment(req.body.date).startOf('day')
+        const events = await Event.find({$or:[{eventDate: {
+                    $gte: today.toDate(),
+                    $lte: moment(today).endOf('day').toDate()
+                }},{sport:req.body.sport}]})
+        res.status(200).json({message:'Found Users',data:events})
+    }catch (e) {
+        res.status(500).json({message:e.message})
+    }
+})
+
+router.post('/addathlete',async(req,res)=>{
+    try{
+        const {eventId,athleteId} = req.body
+        const updatedEvent =await Event.findOneAndUpdate({_id:eventId},{
+            $push:{
+                athletes:{
+                    _id:athleteId
+                }
+            }
+        },{new:true,useFindAndModify:false})
+res.status(200).json({message:'Athlete added',data:updatedEvent})
+    }catch(e){
+        res.status(500).json({message:e.message})
+    }
+})
+
 router.get('/',auth,async (req,res)=>{
     try{
-        const events = await Event.find({})
+        const events = await Event.find({}).populate('athletes').exec()
         if(!events){
             throw new Error('No events found')
         }
@@ -93,20 +123,6 @@ router.get('/:id',auth,async (req,res)=>{
         res.status(500).json({message:e.message})
     }
 })
-
-router.post('/search',auth,async(req,res)=>{
-    try{
-        const today = moment(req.body.date).startOf('day')
-        const events = await Event.find({$or:[{eventDate: {
-                    $gte: today.toDate(),
-                    $lte: moment(today).endOf('day').toDate()
-                }},{sport:req.body.sport}]})
-        res.status(200).json({message:'Found Users',data:events})
-    }catch (e) {
-        res.status(500).json({message:e.message})
-    }
-})
-
 
 
 

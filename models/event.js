@@ -20,6 +20,11 @@ const eventSchema = new Schema({
     eventImage: {
         type: Buffer,
     },
+    athletes:[
+        {type:Schema.Types.ObjectId,
+        ref:'Athlete'
+    }
+    ]
 })
 
 const Event = mongoose.model('Event',eventSchema)
