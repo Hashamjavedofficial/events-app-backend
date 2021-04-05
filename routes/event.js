@@ -72,7 +72,7 @@ router.put('/update',upload.single('eventImage'),async (req,res,next)=>{
 })
 
 
-router.post('/search',auth,async(req,res)=>{
+router.post('/search',async(req,res)=>{
     try{
         const today = moment(req.body.date).startOf('day')
         const events = await Event.find({$or:[{eventDate: {
@@ -119,7 +119,7 @@ router.patch('/add-result',async(req,res)=>{
 })
 
 
-router.get('/',auth,async (req,res)=>{
+router.get('/',async (req,res)=>{
     try{
         const events = await Event.find({}).populate('athletes').exec()
         if(!events){
@@ -131,7 +131,7 @@ router.get('/',auth,async (req,res)=>{
     }
 })
 
-router.get('/:id',auth,async (req,res)=>{
+router.get('/:id',async (req,res)=>{
     try{
         const {id} = req.params;
         const event = await Event.findById(id);
@@ -149,7 +149,7 @@ router.get('/:id',auth,async (req,res)=>{
 
 
 
-router.delete('/:id',auth,async(req,res)=>{
+router.delete('/:id',async(req,res)=>{
     try{
         const event = await Event.deleteOne({_id:req.params.id});
         res.status(200).json({message:'User Deleted',data:event})

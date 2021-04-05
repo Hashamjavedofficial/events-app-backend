@@ -21,7 +21,7 @@ const upload = multer({
     },
 });
 
-router.post('/create',auth,upload.single('athleteImage'),async (req,res,next)=>{
+router.post('/create',upload.single('athleteImage'),async (req,res,next)=>{
     try{
         let buffer=null;
         if(req.file){
@@ -44,7 +44,7 @@ router.post('/create',auth,upload.single('athleteImage'),async (req,res,next)=>{
     }
 })
 
-router.put('/update',auth,upload.single('athleteImage'),async (req,res,next)=>{
+router.put('/update',upload.single('athleteImage'),async (req,res,next)=>{
     try{
         let buffer=null;
         if(req.file){
@@ -67,7 +67,7 @@ router.put('/update',auth,upload.single('athleteImage'),async (req,res,next)=>{
     }
 })
 
-router.get('/',auth,async (req,res)=>{
+router.get('/',async (req,res)=>{
     try{
         const athletes = await Athlete.find({})
         if(!athletes){
@@ -79,7 +79,7 @@ router.get('/',auth,async (req,res)=>{
     }
 })
 
-router.get('/:id',auth,async (req,res)=>{
+router.get('/:id',async (req,res)=>{
     try{
         const {id} = req.params;
         const athlete = await Athlete.findById(id);
@@ -92,7 +92,7 @@ router.get('/:id',auth,async (req,res)=>{
     }
 })
 
-router.post('/search',auth,async(req,res)=>{
+router.post('/search',async(req,res)=>{
     try{
         const athletes = await Athlete.find({$or:[{country:req.body.country},{sport:req.body.sport}]})
         res.status(200).json({message:'Found Athletes',data:athletes})
@@ -101,7 +101,7 @@ router.post('/search',auth,async(req,res)=>{
     }
 })
 
-router.delete('/:id',auth,async(req,res)=>{
+router.delete('/:id',async(req,res)=>{
     try{
         const athlete = await Athlete.deleteOne({_id:req.params.id});
         res.status(200).json({message:'Athlete Deleted',data:athlete})
